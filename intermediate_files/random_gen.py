@@ -24,26 +24,41 @@ def random_bar():
         bar = random_bar()
     return bar
 
+# create a scale with all the notes from C4 to C5
+sc = music21.scale.MajorScale('C4')
+# get all the pitches from the scale
+pitch_collection = sc.getPitches('C4', 'C5')
+print(f"pitch_collection contains {len(pitch_collection)} pitches.")
+print(pitch_collection)
+
+# create list with pitches for the bar
+def create_pitches(size, pitch_collection= pitch_collection):
+    list_p = []
+    for i in range(size):
+        # append a random pitch from the scale
+        list_p.append(random.choice(pitch_collection))
+    return list_p
+
 # create random song
-
-
 def create_random_song():
     # make a list with 8 lists inside
     random_song = [[] for j in range(8)]
+    random_pitches = [[] for j in range(8)]
     # for each list in random_song fill it with random notes
     for i in range(8):
         random_song[i] = random_bar()
-    return random_song
+        random_pitches[i] = create_pitches(len(random_song[i]))
+    return random_song, random_pitches
 
 
 # example
-random_song = create_random_song()
+random_song, random_pitches = create_random_song()
 print('random song: ')
 print(random_song)
+print('random pitches: ')
+print(random_pitches)
 
 # convert into duration
-
-
 def convert_to_duration(random_song_list):
     last = 4.0
     # read the list backwards
@@ -65,6 +80,12 @@ def convert_to_duration(random_song_list):
         bar.reverse()
     return duration_list
 
+def elongate_pitch_list(pitch_list):
+    new_list = []
+    for bar in pitch_list:
+        for note in bar:
+            new_list.append(note)
+    return new_list
 
 # example
 duration_list = convert_to_duration(random_song)
@@ -74,18 +95,21 @@ print(duration_list)
 # convert duration list into music21 stream
 
 
-def convert_to_stream(duration_list):
+def convert_to_stream(duration_list, pitch_list):
+    pitch_list = elongate_pitch_list(pitch_list)
     # create an empty stream
     stream = music21.stream.Stream()
     # define the tempo as 3/4
     stream.append(music21.meter.TimeSignature('3/4'))
     # create note
-    # assign random pitch (C4)
+    # assign the pitch of the random_pitches list
     # assign duration (quarter)
     # append the note into empty stream
+    count = 0
     for duration in duration_list:
-        note = music21.note.Note(pitch='C4', quarterLength=duration)
+        note = music21.note.Note(pitch=pitch_list[count], quarterLength=duration)
         stream.append(note)
+        count += 1
     return stream
 
 # Function that maps the beat distribution of a bar to a series of numbers between 1 and 12 (position of each sixteenth-note in the bar)
@@ -100,7 +124,7 @@ def map_beats(notes):
 
 
 # example
-stream = convert_to_stream(duration_list)
+stream = convert_to_stream(duration_list,random_pitches)
 # print(type(stream))
 # stream.show()
 
@@ -115,8 +139,8 @@ print(map_beats(random_song))
 def produce_dataframe():
     df = pd.DataFrame()
     for i in range(500):
-        random_song = create_random_song()
-        df = df.append({'id': i, 'notes': map_beats(random_song)}, ignore_index=True)
+        random_song, random_pitches = create_random_song()
+        df = df.append({'id': i, 'notes': map_beats(random_song), 'pitches': random_pitches, 'midi': convert_to_stream(convert_to_duration(random_song),random_pitches)}, ignore_index=True)
     df.to_csv('random_songs.csv', index=False)
     return df
 
