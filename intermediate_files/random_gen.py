@@ -1,6 +1,10 @@
 import random
 import music21
 import pandas as pd
+# ignore warnings
+import warnings
+warnings.filterwarnings('ignore')
+
 
 random.seed(1113)
 
@@ -60,7 +64,7 @@ print(random_pitches)
 
 # convert into duration
 def convert_to_duration(random_song_list):
-    last = 4.0
+    last = 3.0
     # read the list backwards
     random_song_list.reverse()
     # create a list with the duration of each note
@@ -71,7 +75,7 @@ def convert_to_duration(random_song_list):
         for note in bar:
             duration_list.append(last - note)
             last = note
-        last += 4.0
+        last += 3.0
     # reverse the list again
     duration_list.reverse()
     # return original order to original song aswell
