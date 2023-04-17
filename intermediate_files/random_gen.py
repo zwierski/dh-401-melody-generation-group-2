@@ -140,7 +140,12 @@ def produce_dataframe():
     df = pd.DataFrame()
     for i in range(500):
         random_song, random_pitches = create_random_song()
-        df = df.append({'id': i, 'notes': map_beats(random_song), 'pitches': random_pitches, 'midi': convert_to_stream(convert_to_duration(random_song),random_pitches)}, ignore_index=True)
+        # write stream to midi file
+        stream = convert_to_stream(convert_to_duration(random_song),random_pitches)
+        # save midi in the random_midis folder
+        file_midi = f'random_midis/random_song_{i}.mid'
+        stream.write('midi', file_midi)
+        df = df.append({'id': i, 'notes': map_beats(random_song), 'pitches': random_pitches, 'midi': file_midi}, ignore_index=True)
     df.to_csv('random_songs.csv', index=False)
     return df
 
