@@ -1,6 +1,10 @@
 import random
 import music21
 import pandas as pd
+# ignore warnings
+import warnings
+warnings.filterwarnings('ignore')
+
 
 random.seed(1113)
 
@@ -60,7 +64,7 @@ print(random_pitches)
 
 # convert into duration
 def convert_to_duration(random_song_list):
-    last = 4.0
+    last = 3.0
     # read the list backwards
     random_song_list.reverse()
     # create a list with the duration of each note
@@ -71,7 +75,7 @@ def convert_to_duration(random_song_list):
         for note in bar:
             duration_list.append(last - note)
             last = note
-        last += 4.0
+        last += 3.0
     # reverse the list again
     duration_list.reverse()
     # return original order to original song aswell
@@ -140,7 +144,12 @@ def produce_dataframe():
     df = pd.DataFrame()
     for i in range(500):
         random_song, random_pitches = create_random_song()
-        df = df.append({'id': i, 'notes': map_beats(random_song), 'pitches': random_pitches, 'midi': convert_to_stream(convert_to_duration(random_song),random_pitches)}, ignore_index=True)
+        # write stream to midi file
+        stream = convert_to_stream(convert_to_duration(random_song),random_pitches)
+        # save midi in the random_midis folder
+        file_midi = f'random_midis/random_song_{i}.mid'
+        stream.write('midi', file_midi)
+        df = df.append({'id': i, 'notes': map_beats(random_song), 'pitches': random_pitches, 'midi': file_midi}, ignore_index=True)
     df.to_csv('random_songs.csv', index=False)
     return df
 
