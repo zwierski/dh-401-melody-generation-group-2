@@ -139,6 +139,20 @@ stream.show('midi')
 print('random song with map_beats: ')
 print(map_beats(random_song))
 
+# translate the music21 pitches to midi numbers
+def translate_pitches(pitches):
+    midi_pitches = []
+    for bar in pitches:
+        bar_midi = []
+        for pitch in bar:
+            bar_midi.append(pitch.midi)
+        midi_pitches.append(bar_midi)
+    return midi_pitches
+
+# print with translate_pitches convertion
+print('random song with translate_pitches: ')
+print(translate_pitches(random_pitches))
+
 # produce a dataframe size 500 samples and save it as csv
 def produce_dataframe():
     df = pd.DataFrame()
@@ -149,7 +163,13 @@ def produce_dataframe():
         # save midi in the random_midis folder
         file_midi = f'random_midis/random_song_{i}.mid'
         stream.write('midi', file_midi)
-        df = df.append({'id': i, 'notes': map_beats(random_song), 'pitches': random_pitches, 'midi': file_midi}, ignore_index=True)
+        notes = map_beats(random_song)
+        pitches = translate_pitches(random_pitches)
+        tuples_note_pitch = []
+        for i in range(len(notes)):
+            for j in range(len(notes[i])):
+                tuples_note_pitch.append((notes[i][j], pitches[i][j]))
+        df = df.append({'id': i, 'notes': notes, 'pitches': pitches, 'beat_pitch': tuples_note_pitch, 'midi': file_midi}, ignore_index=True)
     df.to_csv('random_songs.csv', index=False)
     return df
 
